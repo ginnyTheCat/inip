@@ -48,8 +48,8 @@ export async function nodejs(project: Project) {
   pack.scripts.start = `nodejs ${main}`;
   if (language === Language.TYPESCRIPT) {
     pack.scripts.build = "tsc";
-    pack.scripts.dev = `ts-node-dev --respawn ${src}`;
     pack.scripts.prepare = "npm run build";
+    pack.scripts.dev = `ts-node-dev --respawn ${src}`;
 
     const tsConfig = Object.assign({}, nodeTsConfig);
 
