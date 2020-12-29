@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { gitInit } from "./git";
 import { bool, choice, prompt } from "./utils/input";
 import { mkdir, readFile, writeFile } from "fs/promises";
@@ -32,7 +33,7 @@ async function main() {
   const license = licenses.get(licenseName);
 
   if (license !== undefined) {
-    const fileName = join(resolve(__dirname, "licenses"), `${license}.txt`);
+    const fileName = resolve(__dirname, `../licenses/${license}.txt`);
     var licenseContent = (await readFile(fileName)).toString();
 
     const year = new Date().getFullYear().toString();

@@ -1,13 +1,13 @@
 {
   "name": "inip",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "",
   "main": "dist/index.js",
   "bin": "dist/index.js",
   "scripts": {
     "start": "nodejs dist/index.js",
     "build": "tsc",
-    "dev": "ts-node src/index.ts",
+    "dev": "npm run build && npm run start",
     "prepare": "npm run build"
   },
   "dependencies": {
