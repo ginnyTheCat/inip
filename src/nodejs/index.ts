@@ -50,6 +50,7 @@ export async function nodejs(project: Project) {
     pack.scripts.build = "tsc";
     pack.scripts.prepare = "npm run build";
     pack.scripts.dev = `ts-node-dev --respawn ${src}`;
+    pack.scripts.watch = `ts-node ${src}`;
 
     const tsConfig = Object.assign({}, nodeTsConfig);
 
@@ -63,24 +64,24 @@ export async function nodejs(project: Project) {
     }
 
     await writeFile("tsconfig.json", stringifyBeatiful(tsConfig));
-    await writeFile(".npmignore", "src");
+    await writeFile(".npmignore", "src\ntsconfig.json");
+
     project.gitIgnore.push("dist");
   } else {
-    pack.scripts.dev = `nodemon ${main}`;
+    pack.scripts.dev = pack.scripts.start;
+    pack.scripts.watch = `nodemon ${main}`;
   }
 
   await writeFile("package.json", stringifyBeatiful(pack));
-  project.vsCodeLaunches.push({
-    name: "Dev",
-    type: "node",
-    request: "launch",
-    cwd: "${workspaceRoot}",
-    runtimeExecutable: "npm",
-    runtimeArgs: ["run-script", "dev"],
-  });
 
   if (language === Language.TYPESCRIPT) {
-    await npmInstall(true, "typescript", "@types/node", "ts-node-dev");
+    await npmInstall(
+      true,
+      "typescript",
+      "@types/node",
+      "ts-node",
+      "ts-node-dev"
+    );
   } else {
     await npmInstall(true, "nodemon");
   }

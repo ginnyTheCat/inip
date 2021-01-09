@@ -6,7 +6,6 @@ import { nodejs } from "./nodejs/index";
 import { licenses, Project } from "./project";
 import { join, resolve } from "path";
 import { python } from "./python";
-import { VSCLaunch } from "./vscode";
 import { stringifyBeatiful } from "./utils/json";
 
 enum Technologies {
@@ -51,7 +50,6 @@ async function main() {
     name,
     license,
     gitIgnore: [],
-    vsCodeLaunches: [],
   };
 
   const tool = await choice(
@@ -69,16 +67,6 @@ async function main() {
   }
 
   await writeFile(".gitignore", project.gitIgnore.join("\n"));
-
-  if (project.vsCodeLaunches.length > 0) {
-    const launchJson: VSCLaunch = {
-      version: "0.2.0",
-      configurations: project.vsCodeLaunches,
-    };
-
-    await mkdir(".vscode");
-    await writeFile(".vscode/launch.json", stringifyBeatiful(launchJson));
-  }
 }
 
 main();

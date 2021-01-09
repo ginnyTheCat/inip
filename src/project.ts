@@ -1,10 +1,7 @@
-import { VSCLaunchConfig } from "./vscode";
-
 export interface Project {
   name: string;
   license?: string;
   gitIgnore: string[];
-  vsCodeLaunches: VSCLaunchConfig[];
 }
 
 export const helloWorld = "Hello world";
