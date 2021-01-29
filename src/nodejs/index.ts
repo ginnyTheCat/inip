@@ -10,6 +10,7 @@ import { helloWorld, Project } from "../project";
 enum Libraries {
   AXIOS = "Axios",
   EXPRESS = "express",
+  PUPPETEER = "Puppeteer",
   JEST = "Jest",
 }
 
@@ -49,8 +50,8 @@ export async function nodejs(project: Project) {
   if (language === Language.TYPESCRIPT) {
     pack.scripts.build = "tsc";
     pack.scripts.prepare = "npm run build";
-    pack.scripts.dev = `ts-node-dev --respawn ${src}`;
-    pack.scripts.watch = `ts-node ${src}`;
+    pack.scripts.dev = `ts-node ${src}`;
+    pack.scripts.watch = `ts-node-dev --respawn ${src}`;
 
     const tsConfig = Object.assign({}, nodeTsConfig);
 
@@ -72,57 +73,56 @@ export async function nodejs(project: Project) {
     pack.scripts.watch = `nodemon ${main}`;
   }
 
-  await writeFile("package.json", stringifyBeatiful(pack));
-
-  if (language === Language.TYPESCRIPT) {
-    await npmInstall(
-      true,
-      "typescript",
-      "@types/node",
-      "ts-node",
-      "ts-node-dev"
-    );
-  } else {
-    await npmInstall(true, "nodemon");
-  }
-
   const libs = await choice(
     "What libraries do you want to use?",
     true,
     ...Object.values(Libraries)
   );
 
+  const dep: string[] = [];
+  const devDep: string[] = [];
+  if (language === Language.TYPESCRIPT) {
+    devDep.push("typescript", "@types/node", "ts-node", "ts-node-dev");
+  } else {
+    devDep.push("nodemon");
+  }
+
   for (const l of libs) {
     switch (l) {
       case Libraries.AXIOS:
-        await npmInstall(false, "axios");
+        dep.push("axios");
         break;
       case Libraries.EXPRESS:
-        await npmInstall(false, "express");
+        dep.push("express");
         if (language === Language.TYPESCRIPT) {
-          await npmInstall(true, "@types/express");
+          devDep.push("@types/express");
+        }
+        break;
+      case Libraries.PUPPETEER:
+        dep.push("puppeteer");
+        if (language === Language.TYPESCRIPT) {
+          devDep.push("@types/puppeteer");
         }
         break;
       case Libraries.JEST:
-        const packageJson: PackageJson = JSON.parse(
-          (await readFile("package.json")).toString()
-        );
+        devDep.push("jest");
         if (language === Language.TYPESCRIPT) {
-          await npmInstall(true, "jest", "@types/jest", "ts-jest");
+          devDep.push("@types/jest", "ts-jest");
 
-          packageJson.jest = {
+          pack.jest = {
             preset: "ts-jest",
             testEnvironment: "node",
             modulePathIgnorePatterns: ["dist"],
           };
-        } else {
-          await npmInstall(true, "jest");
         }
 
-        packageJson.scripts.test = "jest";
-        await writeFile("package.json", stringifyBeatiful(packageJson));
-
+        pack.scripts.test = "jest";
         break;
     }
   }
+
+  await writeFile("package.json", stringifyBeatiful(pack));
+
+  npmInstall(false, ...dep);
+  npmInstall(true, ...devDep);
 }
