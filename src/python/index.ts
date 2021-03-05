@@ -1,5 +1,5 @@
 import { writeFile } from "fs/promises";
-import { Project, helloWorld } from "../project";
+import { helloWorld, Project } from "../project";
 
 const defaultCode = `print("${helloWorld}")`;
 

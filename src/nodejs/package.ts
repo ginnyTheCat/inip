@@ -3,11 +3,22 @@ export interface PackageJson {
   version: string;
   description: string;
   main: string;
+  bin?: string;
   typings?: string;
   license?: string;
   scripts: Scripts;
+
   dependencies: Dependencies;
   devDependencies: Dependencies;
+
+  repository?: {
+    type: "git";
+    url: string;
+  };
+  bugs?: {
+    url: string;
+  };
+  homepage?: string;
 
   [key: string]: any;
 }
@@ -20,18 +31,17 @@ interface Dependencies {
   [name: string]: string;
 }
 
-export function createPackageJson(
-  name: string,
-  main: string,
-  license?: string
-): PackageJson {
+export function createPackageJson(name: string, main: string): PackageJson {
   return {
     name: name.toLowerCase(),
     version: "1.0.0",
     description: "",
-    license,
+
     main,
+    bin: undefined,
+
     scripts: {},
+
     dependencies: {},
     devDependencies: {},
   };

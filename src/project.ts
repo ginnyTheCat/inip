@@ -1,6 +1,11 @@
 export interface Project {
   name: string;
   license?: string;
+
+  homepage?: string;
+  bugs?: string;
+
+  gitUrl?: string;
   gitIgnore: string[];
 }
 

@@ -8,8 +8,8 @@ async function internalPrompt(data: DistinctQuestion) {
   return val;
 }
 
-export function prompt(question: string): Promise<string> {
-  return internalPrompt({ message: question });
+export function prompt(question: string, value?: string): Promise<string> {
+  return internalPrompt({ message: question, default: value });
 }
 
 export function bool(

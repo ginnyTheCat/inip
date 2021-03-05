@@ -12,10 +12,10 @@
     "watch": "ts-node-dev --respawn src/index.ts"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "inquirer": "^7.3.3"
   },
   "devDependencies": {
-    "@types/express": "^4.17.9",
     "@types/inquirer": "^7.3.1",
     "@types/node": "^14.14.14",
     "ts-node": "^9.1.1",

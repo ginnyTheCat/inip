@@ -1,11 +1,11 @@
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { mkdir, writeFile } from "fs/promises";
 import { Language } from "../languages";
+import { helloWorld, Project } from "../project";
 import { bool, choice } from "../utils/input";
 import { stringifyBeatiful } from "../utils/json";
 import { npmInstall } from "./npm";
-import { createPackageJson, PackageJson } from "./package";
+import { createPackageJson } from "./package";
 import { nodeTsConfig } from "./tsconfig";
-import { helloWorld, Project } from "../project";
 
 enum Libraries {
   AXIOS = "Axios",
@@ -21,10 +21,7 @@ const defaultCode = `const main = async () => {
 main().catch(console.error)
 `;
 
-const tsJest = `module.exports = {
-  preset: "ts-jest",
-  testEnvironment: "node",
-};`;
+const cliHeader = "#!/usr/bin/env node\n\n";
 
 export async function nodejs(project: Project) {
   await mkdir("src");
@@ -41,9 +38,23 @@ export async function nodejs(project: Project) {
 
   const src =
     language === Language.TYPESCRIPT ? "src/index.ts" : "src/index.js";
-  await writeFile(src, defaultCode);
 
-  const pack = await createPackageJson(project.name, main, project.license);
+  const pack = await createPackageJson(project.name, main);
+
+  pack.license = project.license;
+  pack.homepage = project.homepage;
+
+  if (project.bugs !== undefined) {
+    pack.bugs = { url: project.bugs };
+  }
+
+  if (project.gitUrl !== undefined) {
+    pack.repository = {
+      type: "git",
+      url: "git+" + project.gitUrl,
+    };
+  }
+
   project.gitIgnore.push("node_modules");
 
   pack.scripts.start = `nodejs ${main}`;
@@ -55,11 +66,8 @@ export async function nodejs(project: Project) {
 
     const tsConfig = Object.assign({}, nodeTsConfig);
 
-    const declarations = await bool(
-      "Should TypeScript emit declaration files? (usefull if you're building a library)",
-      false
-    );
-    if (declarations) {
+    const lib = await bool("Are you building a library?", false);
+    if (lib) {
       tsConfig.compilerOptions!.declaration = true;
       pack.typings = "dist/index.d.ts";
     }
@@ -73,6 +81,14 @@ export async function nodejs(project: Project) {
     pack.scripts.watch = `nodemon ${main}`;
   }
 
+  const cli = await bool("Are you building a CLI tool?", false);
+  if (cli) {
+    pack.bin = main;
+    await writeFile(src, cliHeader + +defaultCode);
+  } else {
+    await writeFile(src, defaultCode);
+  }
+
   const libs = await choice(
     "What libraries do you want to use?",
     true,
@@ -81,6 +97,7 @@ export async function nodejs(project: Project) {
 
   const dep: string[] = [];
   const devDep: string[] = [];
+
   if (language === Language.TYPESCRIPT) {
     devDep.push("typescript", "@types/node", "ts-node", "ts-node-dev");
   } else {

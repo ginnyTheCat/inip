@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-import { gitInit } from "./git";
-import { bool, choice, prompt } from "./utils/input";
 import { mkdir, readFile, writeFile } from "fs/promises";
+import { resolve } from "path";
+import { gitInit, gitOrigin } from "./git";
+import { createGitHubRepo } from "./github";
 import { nodejs } from "./nodejs/index";
 import { licenses, Project } from "./project";
-import { join, resolve } from "path";
 import { python } from "./python";
-import { stringifyBeatiful } from "./utils/json";
+import { load, save, settings } from "./settings";
+import { bool, choice, prompt } from "./utils/input";
 
 enum Technologies {
   NODEJS = "Node.js",
@@ -14,13 +15,39 @@ enum Technologies {
 }
 
 async function main() {
+  await load();
+
   const name = await prompt("Choose a name for your project:");
   await mkdir(name);
   process.chdir(name);
 
+  var homepage: string | undefined;
+  var bugs: string | undefined;
+  var gitUrl: string | undefined;
+
   const git = await bool("Would you like to initialize a git repository?");
   if (git) {
     await gitInit();
+
+    const github = await bool("Do you want to create a GitHub repo?", false);
+    if (github) {
+      if (settings.githubToken === undefined) {
+        settings.githubToken = await prompt("Your GitHub personal token:");
+      }
+
+      const repo = await prompt("Repo name:", name);
+      const _private = await bool("Should the repo be private?", true);
+
+      const url = await createGitHubRepo(repo, _private, settings.githubToken);
+
+      homepage = url + "#readme";
+      bugs = url + "/issues";
+      gitUrl = url + ".git";
+    }
+
+    if (gitUrl !== undefined) {
+      await gitOrigin(gitUrl);
+    }
   }
 
   const licenseName = await choice(
@@ -49,7 +76,12 @@ async function main() {
   const project: Project = {
     name,
     license,
+
+    homepage,
+    bugs,
+
     gitIgnore: [],
+    gitUrl,
   };
 
   const tool = await choice(
@@ -67,6 +99,8 @@ async function main() {
   }
 
   await writeFile(".gitignore", project.gitIgnore.join("\n"));
+
+  await save();
 }
 
 main();
