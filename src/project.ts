@@ -1,3 +1,5 @@
+import { Task } from "./utils/tasks";
+
 export interface Project {
   name: string;
   license?: string;
@@ -7,6 +9,8 @@ export interface Project {
 
   gitUrl?: string;
   gitIgnore: string[];
+
+  tasks: Task[];
 }
 
 export const helloWorld = "Hello world";

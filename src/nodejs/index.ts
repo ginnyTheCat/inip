@@ -1,6 +1,8 @@
 import { mkdir, writeFile } from "fs/promises";
+import { yellow } from "kleur";
 import { Language } from "../languages";
 import { helloWorld, Project } from "../project";
+import { settings } from "../settings";
 import { bool, choice } from "../utils/input";
 import { stringify } from "../utils/json";
 import { npmInstall } from "./npm";
@@ -140,6 +142,15 @@ export async function nodejs(project: Project) {
 
   await writeFile("package.json", stringify(pack));
 
-  await npmInstall(false, ...dep);
-  await npmInstall(true, ...devDep);
+  project.tasks.push({
+    title: `Installing ${yellow(dep.length)} dependencies`,
+    description: settings.npmInstaller,
+    task: () => npmInstall(false, ...dep),
+  });
+
+  project.tasks.push({
+    title: `Installing ${yellow(devDep.length)} dev dependencies`,
+    description: settings.npmInstaller,
+    task: () => npmInstall(true, ...devDep),
+  });
 }

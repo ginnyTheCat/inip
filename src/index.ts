@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { mkdir, readFile, writeFile } from "fs/promises";
-import { bold, cyan, green, magenta, yellow } from "kleur";
+import { bold, cyan, green, grey, magenta, white, yellow } from "kleur";
+import ora from "ora";
 import { resolve } from "path";
 import { gitInit, gitOrigin } from "./git";
 import { createGitHubRepo } from "./github";
@@ -119,6 +120,8 @@ async function main() {
 
     gitIgnore: [],
     gitUrl,
+
+    tasks: [],
   };
 
   const tool = await choice(
@@ -136,6 +139,21 @@ async function main() {
   }
 
   await writeFile(".gitignore", project.gitIgnore.join("\n"));
+
+  console.log();
+  for (const t of project.tasks) {
+    var text = bold(t.title);
+    if (t.description !== undefined) {
+      text += ` ${grey("»")} ${white(t.description)}`;
+    }
+
+    const spinner = ora(text).start();
+
+    await t
+      .task()
+      .then(() => spinner.succeed())
+      .catch(() => spinner.fail());
+  }
 
   await save();
 

@@ -10,10 +10,13 @@ type Hints = "github";
 interface Settings {
   hints: Hints[];
   githubToken?: string;
+
+  npmInstaller: "npm" | "pnpm" | "yarn";
 }
 
 const _default: Settings = {
   hints: ["github"],
+  npmInstaller: "npm",
 };
 
 export var settings: Settings;
