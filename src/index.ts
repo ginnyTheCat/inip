@@ -1,12 +1,14 @@
 #!/usr/bin/env node
+
 import { mkdir, readFile, writeFile } from "fs/promises";
+import { bold, cyan, green, magenta, yellow } from "kleur";
 import { resolve } from "path";
 import { gitInit, gitOrigin } from "./git";
 import { createGitHubRepo } from "./github";
 import { nodejs } from "./nodejs/index";
 import { licenses, Project } from "./project";
 import { python } from "./python";
-import { load, save, settings } from "./settings";
+import { load, save, settings, useHint } from "./settings";
 import { bool, choice, prompt } from "./utils/input";
 
 enum Technologies {
@@ -17,7 +19,13 @@ enum Technologies {
 async function main() {
   await load();
 
-  const name = await prompt("Choose a name for your project:");
+  console.log(
+    `\n${bold(
+      `Time to built something ${magenta("great")}!`
+    )}\nLets's get started setting up your project.\n`
+  );
+
+  const name = await prompt(`What do you want to ${yellow("name")} it?`);
   await mkdir(name);
   process.chdir(name);
 
@@ -25,18 +33,47 @@ async function main() {
   var bugs: string | undefined;
   var gitUrl: string | undefined;
 
-  const git = await bool("Would you like to initialize a git repository?");
+  const git = await bool(
+    `Would you like to initialize a ${yellow("git repo")}?`
+  );
   if (git) {
     await gitInit();
 
-    const github = await bool("Do you want to create a GitHub repo?", false);
+    const github = await bool(
+      `Do you want to create a ${yellow("GitHub repo")}?`,
+      false
+    );
     if (github) {
       if (settings.githubToken === undefined) {
-        settings.githubToken = await prompt("Your GitHub personal token:");
+        console.log(
+          `\nTo be able to create a GitHub repo we need your ${yellow(
+            "personal access token"
+          )}.\nThe tokens has to have access to the ${green().bold(
+            "repo scope"
+          )}.\nYou'll only have to input it once. ${yellow(
+            "We'll save it for you."
+          )}\nCreate a new token on ${cyan(
+            "https://github.com/settings/tokens"
+          )}.\n`
+        );
+
+        settings.githubToken = await prompt("Your personal access token:");
       }
 
-      const repo = await prompt("Repo name:", name);
-      const _private = await bool("Should the repo be private?", true);
+      if (useHint("github")) {
+        console.log(
+          `\nChoose a ${yellow(
+            "repo name"
+          )}.\n\nFor personal repos, input ${yellow(
+            "name"
+          )}.\nFor organisation repos, input ${green("org")}/${yellow(
+            "name"
+          )}.\n`
+        );
+      }
+
+      const repo = await prompt("repo name", name);
+      const _private = await bool("private?", true);
 
       const url = await createGitHubRepo(repo, _private, settings.githubToken);
 
@@ -85,7 +122,7 @@ async function main() {
   };
 
   const tool = await choice(
-    "Choose a technology:",
+    "Choose a technology",
     false,
     ...Object.values(Technologies)
   );
@@ -101,6 +138,8 @@ async function main() {
   await writeFile(".gitignore", project.gitIgnore.join("\n"));
 
   await save();
+
+  console.log(`\n${magenta().bold("Finished!")}\n`);
 }
 
 main();

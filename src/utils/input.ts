@@ -1,15 +1,23 @@
-import { DistinctQuestion, prompt as inquirerPrompt } from "inquirer";
+import prompts from "prompts";
 
-async function internalPrompt(data: DistinctQuestion) {
-  data.name = "val";
+async function internalPrompt(data: Omit<prompts.PromptObject, "name">) {
+  const { val } = await prompts({
+    name: "val",
+    ...data,
+  });
 
-  const { val } = await inquirerPrompt([data]);
-
+  if (val === undefined) {
+    process.exit(0);
+  }
   return val;
 }
 
 export function prompt(question: string, value?: string): Promise<string> {
-  return internalPrompt({ message: question, default: value });
+  return internalPrompt({
+    type: "text",
+    message: question,
+    initial: value,
+  });
 }
 
 export function bool(
@@ -19,28 +27,32 @@ export function bool(
   return internalPrompt({
     type: "confirm",
     message: question,
-    default: value,
+    initial: value,
   });
 }
 
-export async function choice(
+export function choice<T extends string>(
   question: string,
   multiple: false,
-  ...choices: string[]
-): Promise<string>;
-export async function choice(
+  ...choices: T[]
+): Promise<T>;
+export function choice<T extends string>(
   question: string,
   multiple: true,
-  ...choices: string[]
-): Promise<string[]>;
-export async function choice(
+  ...choices: T[]
+): Promise<T[]>;
+export function choice<T extends string>(
   question: string,
   multiple: boolean,
-  ...choices: string[]
-): Promise<string | string[]> {
+  ...choices: T[]
+): Promise<T | T[]> {
   return internalPrompt({
-    type: multiple ? "checkbox" : "list",
+    type: multiple ? "multiselect" : "select",
     message: question,
-    choices,
+    choices: choices.map((c) => {
+      return { title: c, value: c };
+    }),
+    hint: "",
+    instructions: "",
   });
 }

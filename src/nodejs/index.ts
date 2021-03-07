@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "fs/promises";
 import { Language } from "../languages";
 import { helloWorld, Project } from "../project";
 import { bool, choice } from "../utils/input";
-import { stringifyBeatiful } from "../utils/json";
+import { stringify } from "../utils/json";
 import { npmInstall } from "./npm";
 import { createPackageJson } from "./package";
 import { nodeTsConfig } from "./tsconfig";
@@ -51,7 +51,7 @@ export async function nodejs(project: Project) {
   if (project.gitUrl !== undefined) {
     pack.repository = {
       type: "git",
-      url: "git+" + project.gitUrl,
+      url: project.gitUrl,
     };
   }
 
@@ -72,7 +72,7 @@ export async function nodejs(project: Project) {
       pack.typings = "dist/index.d.ts";
     }
 
-    await writeFile("tsconfig.json", stringifyBeatiful(tsConfig));
+    await writeFile("tsconfig.json", stringify(tsConfig));
     await writeFile(".npmignore", "src\ntsconfig.json");
 
     project.gitIgnore.push("dist");
@@ -138,8 +138,8 @@ export async function nodejs(project: Project) {
     }
   }
 
-  await writeFile("package.json", stringifyBeatiful(pack));
+  await writeFile("package.json", stringify(pack));
 
-  npmInstall(false, ...dep);
-  npmInstall(true, ...devDep);
+  await npmInstall(false, ...dep);
+  await npmInstall(true, ...devDep);
 }

@@ -1,32 +1,40 @@
 import { readFile, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
+import { stringify } from "./utils/json";
 
-const file = join(homedir(), ".inip.json");
+export const file = join(homedir(), ".inip.json");
+
+type Hints = "github";
 
 interface Settings {
+  hints: Hints[];
   githubToken?: string;
 }
 
-const _default: Settings = {};
+const _default: Settings = {
+  hints: ["github"],
+};
 
 export var settings: Settings;
 
-export async function load() {
-  if (file === undefined) {
-    settings = {};
-  } else {
-    await writeFile(file, JSON.stringify(_default), {
-      flag: "wx",
-    }).catch(() => {});
+export function useHint(hint: Hints) {
+  const i = settings.hints.indexOf(hint);
+  if (i <= -1) return false;
 
-    const content = await readFile(file, "utf-8");
-    settings = JSON.parse(content);
-  }
+  settings.hints.splice(i, 1);
+  return true;
+}
+
+export async function load() {
+  await writeFile(file, "{}", { flag: "wx" }).catch(() => {});
+
+  const content = await readFile(file, "utf-8");
+  settings = Object.assign({}, _default, JSON.parse(content));
 }
 
 export async function save() {
   if (file !== undefined) {
-    writeFile(file, JSON.stringify(settings), "utf-8");
+    writeFile(file, stringify(settings), "utf-8");
   }
 }
