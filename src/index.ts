@@ -11,6 +11,7 @@ import { licenses, Project } from "./project";
 import { python } from "./python";
 import { load, save, settings, useHint } from "./settings";
 import { bool, choice, prompt } from "./utils/input";
+import { exec } from "./utils/promise";
 
 enum Technologies {
   NODEJS = "Node.js",
@@ -89,7 +90,7 @@ async function main() {
   }
 
   const licenseName = await choice(
-    "Which license do you want to use?",
+    `Which ${yellow("license")} do you want to use?`,
     false,
     "None",
     ...licenses.keys()
@@ -104,7 +105,7 @@ async function main() {
     licenseContent = licenseContent.replace("{year}", year);
 
     if (licenseContent.includes("{holder}")) {
-      const name = await prompt("Who is the copyright holder?");
+      const name = await prompt(`Who is the ${yellow("copyright holder")}?`);
       licenseContent = licenseContent.replace("{holder}", name);
     }
 
@@ -125,7 +126,7 @@ async function main() {
   };
 
   const tool = await choice(
-    "Choose a technology",
+    `Choose a ${yellow("technology")}`,
     false,
     ...Object.values(Technologies)
   );
@@ -140,7 +141,9 @@ async function main() {
 
   await writeFile(".gitignore", project.gitIgnore.join("\n"));
 
-  console.log();
+  if (project.tasks.length > 0) {
+    console.log();
+  }
   for (const t of project.tasks) {
     var text = bold(t.title);
     if (t.description !== undefined) {
@@ -158,6 +161,10 @@ async function main() {
   await save();
 
   console.log(`\n${magenta().bold("Finished!")}\n`);
+
+  if (settings.openVSCode) {
+    await exec("code .");
+  }
 }
 
 main();

@@ -29,7 +29,7 @@ export async function nodejs(project: Project) {
   await mkdir("src");
 
   const language = await choice(
-    "Which language do you want to use?",
+    `Which ${yellow("language")} do you want to use?`,
     false,
     Language.TYPESCRIPT,
     Language.JAVASCRIPT
@@ -68,7 +68,7 @@ export async function nodejs(project: Project) {
 
     const tsConfig = Object.assign({}, nodeTsConfig);
 
-    const lib = await bool("Are you building a library?", false);
+    const lib = await bool(`Are you building a ${yellow("library")}?`, false);
     if (lib) {
       tsConfig.compilerOptions!.declaration = true;
       pack.typings = "dist/index.d.ts";
@@ -83,7 +83,7 @@ export async function nodejs(project: Project) {
     pack.scripts.watch = `nodemon ${main}`;
   }
 
-  const cli = await bool("Are you building a CLI tool?", false);
+  const cli = await bool(`Are you building a ${yellow("CLI tool")}?`, false);
   if (cli) {
     pack.bin = main;
     await writeFile(src, cliHeader + +defaultCode);
@@ -92,7 +92,7 @@ export async function nodejs(project: Project) {
   }
 
   const libs = await choice(
-    "What libraries do you want to use?",
+    `Which ${yellow("libraries")} do you want to use?`,
     true,
     ...Object.values(Libraries)
   );

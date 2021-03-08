@@ -8,15 +8,19 @@ export const file = join(homedir(), ".inip.json");
 type Hints = "github";
 
 interface Settings {
-  hints: Hints[];
   githubToken?: string;
 
   npmInstaller: "npm" | "pnpm" | "yarn";
+  openVSCode: boolean;
+
+  hints: Hints[];
 }
 
 const _default: Settings = {
-  hints: ["github"],
   npmInstaller: "npm",
+  openVSCode: false,
+
+  hints: ["github"],
 };
 
 export var settings: Settings;

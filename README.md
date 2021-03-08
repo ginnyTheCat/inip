@@ -1,6 +1,6 @@
 # inip
 
-Fast project generation script
+Project creation tool
 
 `npx inip`
 
