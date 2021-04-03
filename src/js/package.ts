@@ -2,7 +2,7 @@ export interface PackageJson {
   name: string;
   version: string;
   description: string;
-  main: string;
+  main?: string;
   bin?: string;
   typings?: string;
   license?: string;
@@ -31,14 +31,18 @@ interface Dependencies {
   [name: string]: string;
 }
 
-export function createPackageJson(name: string, main: string): PackageJson {
+export function createPackageJson(
+  name: string,
+  main: string | undefined
+): PackageJson {
   return {
     name: name.toLowerCase(),
-    version: "1.0.0",
+    version: "0.0.0",
     description: "",
 
     main,
     bin: undefined,
+    typings: undefined,
 
     scripts: {},
 

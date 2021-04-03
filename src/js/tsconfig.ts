@@ -12,6 +12,7 @@ interface CompilerOptions {
   target?: ESVersion;
   module?: Module;
   lib?: Lib[];
+  jsx?: "react";
 
   outDir?: string;
   rootDir?: string;
@@ -38,16 +39,17 @@ interface CompilerOptions {
   resolveJsonModule?: boolean;
 }
 
-export const nodeTsConfig: TsConfig = {
+export const baseTsConfig: TsConfig = {
   compilerOptions: {
-    target: "es6",
+    target: undefined,
     module: "commonjs",
-    lib: ["es6"],
+    lib: undefined,
+    jsx: undefined,
 
     outDir: "dist",
     rootDir: "src",
 
-    moduleResolution: "node",
+    moduleResolution: undefined,
     removeComments: true,
     downlevelIteration: true,
 
@@ -66,5 +68,25 @@ export const nodeTsConfig: TsConfig = {
     emitDecoratorMetadata: true,
 
     resolveJsonModule: true,
+  },
+};
+
+export const nodeTsConfig: TsConfig = {
+  ...baseTsConfig,
+  compilerOptions: {
+    ...baseTsConfig.compilerOptions,
+    target: "es6",
+    lib: ["es2018"],
+    moduleResolution: "node",
+  },
+};
+
+export const reactTsConfig: TsConfig = {
+  ...baseTsConfig,
+  compilerOptions: {
+    ...baseTsConfig.compilerOptions,
+    target: "es5",
+    lib: ["es6", "dom"],
+    jsx: "react",
   },
 };

@@ -6,7 +6,7 @@ import ora from "ora";
 import { resolve } from "path";
 import { gitInit, gitOrigin } from "./git";
 import { createGitHubRepo } from "./github";
-import { nodejs } from "./nodejs/index";
+import { js } from "./js/index";
 import { licenses, Project } from "./project";
 import { python } from "./python";
 import { load, save, settings, useHint } from "./settings";
@@ -15,6 +15,7 @@ import { exec } from "./utils/promise";
 
 enum Technologies {
   NODEJS = "Node.js",
+  JS = "JavaScript",
   PYTHON = "Python",
 }
 
@@ -132,7 +133,10 @@ async function main() {
   );
   switch (tool) {
     case Technologies.NODEJS:
-      await nodejs(project);
+      await js(project, true);
+      break;
+    case Technologies.JS:
+      await js(project, false);
       break;
     case Technologies.PYTHON:
       await python(project);

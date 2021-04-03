@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
-import { stringify } from "./utils/json";
+import { formatJson } from "./utils/format";
 
 export const file = join(homedir(), ".inip.json");
 
@@ -42,6 +42,6 @@ export async function load() {
 
 export async function save() {
   if (file !== undefined) {
-    writeFile(file, stringify(settings), "utf-8");
+    writeFile(file, formatJson(settings), "utf-8");
   }
 }
